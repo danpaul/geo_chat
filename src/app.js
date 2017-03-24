@@ -1,5 +1,7 @@
 /*eslint no-underscore-dangle: ["error", { "allow": ["_root"] }]*/
+/* global navigator */
 
+// import _ from 'underscore';
 import React, { Component } from 'react';
 import { View } from 'react-native';
 import firebase from 'firebase';
@@ -15,6 +17,7 @@ import { Container,
          Right,
          Body,
          Icon } from 'native-base';
+import GeoFire from 'geofire';
 
 import { Spinner } from './components/common';
 import LoginForm from './components/LoginForm';
@@ -24,17 +27,25 @@ import AddLocation from './components/AddLocation';
 import config from './config';
 import { location } from './controller';
 
+const MARKER_UPDATE_INTERVAL = 5000;
+const MARKER_SUBSCRIBE_RADIUS = 20; // distance in KM
+
 class App extends Component {
 
 
   constructor() {
       super();
-      this.state = { activeTab: 'place' }; // either place or map
+      this.state = {
+          activeTab: 'map', // either place or map
+          loggedIn: null,
+          latitude: null,
+          longitude: null
+      };
       this.addLocation = this.addLocation.bind(this);
       this.closeDrawer = this.closeDrawer.bind(this);
+      this.getMarkers = this.getMarkers.bind(this);
       this.openDrawer = this.openDrawer.bind(this);
   }
-
   componentWillMount() {
       firebase.initializeApp(config.firebase);
       firebase.auth().onAuthStateChanged((user) => {
@@ -44,12 +55,48 @@ class App extends Component {
               this.setState({ loggedIn: false });
           }
       });
+      this.geoFire = new GeoFire(firebase.database().ref('/locations-geofire'));
+    //   var db = admin.database();
+    //   var ref = db.ref('/locations/' + event.params.locationId);
+  }
+  componentDidMount() {
+      let initialized = false;
+      this.watchID = navigator.geolocation.watchPosition(({ coords:
+                                                          { latitude, longitude } }) => {
+        if (!initialized) {
+            initialized = true;
+            this.geoQuery = this.geoFire.query({
+              center: [latitude, longitude],
+              radius: MARKER_SUBSCRIBE_RADIUS
+            });
+            this.geoQuery.on('key_entered', (key, keyLocation, distance) => {
+                // get the location data
+                firebase.database().ref(`/locations/${key}`).once('value', (snapshot) => {
+                    const locationData = snapshot.val();
+console.log('location', locationData);
+                });
+            });
+            this.geoQuery.on('key_entered', (key, keyLocation, distance) => {
+                console.log('TODO: handle key exiting');
+            });
+        }
+        //   this.setState({ latitude, longitude }, () => {
+        //       const f =
+        //       _.debounce(() => {
+          //
+        //       }, MARKER_UPDATE_INTERVAL);
+        //     //   console.log('position updated: ', latitude, longitude);
+        //   });
+      });
+  }
+  componentWillUnmount() {
+      navigator.geolocation.clearWatch(this.watchID);
   }
   getContent() {
       switch (this.state.loggedIn) {
         case true:
             if (this.state.activeTab === 'map') {
-                return <Map />;
+                return (<Map />);
             }
             return (<AddLocation
                 addLocation={this.addLocation}
@@ -63,6 +110,25 @@ class App extends Component {
                 </View>
             );
         }
+  }
+  getFooter() {
+      if (!this.state.loggedIn) { return null; }
+      return (<Footer>
+          <FooterTab>
+              <Button
+                  onPress={() => { this.selectTab('map'); }}
+                  active={this.state.activeTab === 'map'}
+              >
+                  <Icon name="navigate" />
+              </Button>
+              <Button
+                  onPress={() => { this.selectTab('place'); }}
+                  active={this.state.activeTab === 'place'}
+              >
+                  <Icon name="flag" />
+              </Button>
+          </FooterTab>
+      </Footer>);
   }
   addLocation(options) {
       location.create(options)
@@ -83,6 +149,13 @@ class App extends Component {
   }
   selectTab(activeTab) {
       this.setState({ activeTab });
+  }
+  getMarkers() {
+      location.get(this.state)
+        .then(() => {
+// asdf
+        })
+        .catch(console.warn);
   }
   render() {
       return (
@@ -106,22 +179,7 @@ class App extends Component {
                 <Content>
                     {this.getContent()}
                 </Content>
-                <Footer>
-                    <FooterTab>
-                        <Button
-                            onPress={() => { this.selectTab('map'); }}
-                            active={this.state.activeTab === 'map'}
-                        >
-                            <Icon name="navigate" />
-                        </Button>
-                        <Button
-                            onPress={() => { this.selectTab('place'); }}
-                            active={this.state.activeTab === 'place'}
-                        >
-                            <Icon name="flag" />
-                        </Button>
-                    </FooterTab>
-                </Footer>
+                {this.getFooter()}
             </Container>
         </Drawer>
     );

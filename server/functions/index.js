@@ -35,7 +35,7 @@ exports.addToGeoIndex = functions.database.ref('/locations/{locationId}')
         var ref = db.ref('/locations/' + event.params.locationId);
 
         // Attach an asynchronous callback to read the data at our posts reference
-        ref.on('value', function(snapshot) {
+        ref.once('value', function(snapshot) {
 
             var location = snapshot.val();
 
