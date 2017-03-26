@@ -6,6 +6,19 @@ import MapView, { Marker } from 'react-native-maps';
 
 class Map extends Component {
     state = {};
+    getLocations() {
+        return this.props.locations.map((l) =>
+            <Marker
+                key={l.key}
+                coordinate={{
+                    latitude: l.latitude,
+                    longitude: l.longitude
+                }}
+                title={l.title}
+                description={l.title}
+            />
+        );
+    }
     render() {
         return (
             <MapView
@@ -14,7 +27,9 @@ class Map extends Component {
                 followsUserLocation
                 rotateEnabled={false}
                 scrollEnabled={false}
-            />
+            >
+                {this.getLocations()}
+            </MapView>
         );
     }
 }

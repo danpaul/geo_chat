@@ -3,7 +3,6 @@ This is a test/learning project using React Native and Firebase. The app allows 
 
 ## Todo
 *  Add geo get query
-*  Handle adding/removing listeners to locations as user's location changes
 *  Move location notes under location
 *  Add clickable markers to map for location
 *  On click, show view with:
@@ -14,6 +13,7 @@ This is a test/learning project using React Native and Firebase. The app allows 
 * after submitting new comment, return to comment view
 * Add Firebase indexes
 * Add Firebase validation and authorization
+*  Handle adding/removing listeners to locations as user's location changes
 
 ## notes
 * Firebase timestamp: https://github.com/angular/angularfire2/issues/211

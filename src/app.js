@@ -43,7 +43,6 @@ class App extends Component {
       };
       this.addLocation = this.addLocation.bind(this);
       this.closeDrawer = this.closeDrawer.bind(this);
-      this.getMarkers = this.getMarkers.bind(this);
       this.openDrawer = this.openDrawer.bind(this);
   }
   componentWillMount() {
@@ -56,8 +55,6 @@ class App extends Component {
           }
       });
       this.geoFire = new GeoFire(firebase.database().ref('/locations-geofire'));
-    //   var db = admin.database();
-    //   var ref = db.ref('/locations/' + event.params.locationId);
   }
   componentDidMount() {
       let initialized = false;
@@ -92,7 +89,7 @@ class App extends Component {
       switch (this.state.loggedIn) {
         case true:
             if (this.state.activeTab === 'map') {
-                return (<Map />);
+                return (<Map locations={this.state.locations} />);
             }
             return (<AddLocation
                 addLocation={this.addLocation}
@@ -146,16 +143,7 @@ class App extends Component {
   selectTab(activeTab) {
       this.setState({ activeTab });
   }
-  getMarkers() {
-      location.get(this.state)
-        .then(() => {
-// asdf
-        })
-        .catch(console.warn);
-  }
   render() {
-// asdf
-console.log(this.state);
       return (
           <Drawer
             ref={(ref) => { this.drawer = ref; }}
