@@ -1,5 +1,4 @@
 import firebase from 'firebase';
-// import config from '../config';
 import { note } from './index';
 
 class Location {

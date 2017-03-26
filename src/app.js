@@ -23,7 +23,7 @@ import { Spinner } from './components/common';
 import LoginForm from './components/LoginForm';
 import SideBar from './components/SideBar';
 import Map from './components/Map';
-import AddLocation from './components/AddLocation';
+import AddLocationNote from './components/AddLocationNote';
 import config from './config';
 import { location } from './controller';
 
@@ -70,6 +70,7 @@ class App extends Component {
                 // get the location data
                 firebase.database().ref(`/locations/${key}`).once('value', (snapshot) => {
                     const locationData = snapshot.val();
+                    if (!locationData) return;
                     locationData.key = snapshot.key;
                     const locations = this.state.locations.concat([locationData]);
                     this.setState({ locations });
@@ -91,7 +92,8 @@ class App extends Component {
             if (this.state.activeTab === 'map') {
                 return (<Map locations={this.state.locations} />);
             }
-            return (<AddLocation
+            return (<AddLocationNote
+                isNote={false}
                 addLocation={this.addLocation}
             />);
         case false:
