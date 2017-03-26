@@ -1,13 +1,12 @@
 import firebase from 'firebase';
 
 class Note {
-    create({ message, locationId }) {
+    add({ message, locationId }) {
         return new Promise((resolve, reject) => {
+            const path = `/locations/${locationId}/notes`;
             const user = firebase.auth().currentUser.uid;
-            firebase.database().ref(`/notes/${locationId}`)
-                .push({ message, user })
-                .then(resolve)
-                .catch(reject);
+            const newPostRef = firebase.database().ref(path).push();
+            newPostRef.set({ message, user }).then(resolve).catch(reject);
         });
     }
 }

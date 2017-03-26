@@ -27,7 +27,6 @@ import AddLocation from './components/AddLocation';
 import config from './config';
 import { location } from './controller';
 
-const MARKER_UPDATE_INTERVAL = 5000;
 const MARKER_SUBSCRIBE_RADIUS = 20; // distance in KM
 
 class App extends Component {
@@ -37,6 +36,7 @@ class App extends Component {
       super();
       this.state = {
           activeTab: 'map', // either place or map
+          locations: [],
           loggedIn: null,
           latitude: null,
           longitude: null
@@ -69,24 +69,20 @@ class App extends Component {
               center: [latitude, longitude],
               radius: MARKER_SUBSCRIBE_RADIUS
             });
-            this.geoQuery.on('key_entered', (key, keyLocation, distance) => {
+            this.geoQuery.on('key_entered', (key) => {
                 // get the location data
                 firebase.database().ref(`/locations/${key}`).once('value', (snapshot) => {
                     const locationData = snapshot.val();
-console.log('location', locationData);
+                    locationData.key = snapshot.key;
+                    const locations = this.state.locations.concat([locationData]);
+                    this.setState({ locations });
                 });
             });
-            this.geoQuery.on('key_entered', (key, keyLocation, distance) => {
-                console.log('TODO: handle key exiting');
+            this.geoQuery.on('key_exited', (key) => {
+                const locations = this.state.locations.filter(l => l.key !== key);
+                this.setState({ locations });
             });
         }
-        //   this.setState({ latitude, longitude }, () => {
-        //       const f =
-        //       _.debounce(() => {
-          //
-        //       }, MARKER_UPDATE_INTERVAL);
-        //     //   console.log('position updated: ', latitude, longitude);
-        //   });
       });
   }
   componentWillUnmount() {
@@ -158,6 +154,8 @@ console.log('location', locationData);
         .catch(console.warn);
   }
   render() {
+// asdf
+console.log(this.state);
       return (
           <Drawer
             ref={(ref) => { this.drawer = ref; }}
