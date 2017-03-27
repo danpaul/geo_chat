@@ -11,6 +11,7 @@ class AddLocationNote extends Component {
     constructor() {
         super();
         this.state = { title: '', message: '', latitude: null, longitude: null, submitting: false };
+        this.clear = this.clear.bind(this);
         navigator.geolocation.getCurrentPosition(({ coords:
                                                   { latitude, longitude } }) => {
             this.setState({ latitude, longitude });
@@ -48,6 +49,7 @@ class AddLocationNote extends Component {
                             style={{ height: 100 }}
                             multiline
                             placeholder="Message"
+                            value={this.state.message}
                             onChangeText={message => this.setState({ message })}
                         />
                     </Item>

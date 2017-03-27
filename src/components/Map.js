@@ -7,17 +7,11 @@ import MapView, { Marker, Callout } from 'react-native-maps';
 import { Container,
          Card,
          CardItem,
-         Drawer,
-         Header,
-         Title,
          Content,
          Footer,
          FooterTab,
          Button,
-         Left,
-         Right,
-         Body,
-         Icon } from 'native-base';
+         Body } from 'native-base';
 
 import AddLocationNote from './AddLocationNote';
 
@@ -56,7 +50,14 @@ class Map extends Component {
     }
     getLocationViewContent() {
         if (!this.state.location) return null;
-        const notes = _.map(this.state.location.notes, (nIn, k) => {
+        let location = this.state.location;
+        // grab the "live" location from props if one exists
+        this.props.locations.forEach((l) => {
+            if (l.key === this.state.location.key) {
+                location = l;
+            }
+        });
+        const notes = _.map(location.notes, (nIn, k) => {
             const n = nIn;
             n.key = k;
             return n;
@@ -64,6 +65,7 @@ class Map extends Component {
         return (<ScrollView>
             <Card style={{ paddingTop: 20 }}>
                 <AddLocationNote
+                    ref="addLocationNote"
                     isNote
                     key={this.state.location.key}
                     addNote={this.addNote}
@@ -81,14 +83,17 @@ class Map extends Component {
         </ScrollView>);
     }
     addNote(message) {
-        note.add({ message, locationId: this.state.location.key });
+        note.add({ message, locationId: this.state.location.key })
+            .then(() => {
+                console.log('in then');
+                this.refs.addLocationNote.clear();
+            })
+            .catch(err => console.log(err));
     }
     handleLocationSelect(location) {
         this.setState({ location });
     }
     render() {
-// console.log('this.state.location', this.state.location)
-        const modalVisible = this.state.location !== null;
         return (
             <MapView
                 style={{ flex: 1, height: Dimensions.get('window').height - 80 }}
@@ -100,9 +105,8 @@ class Map extends Component {
                 <Modal
                   animationType={'slide'}
                   transparent={false}
-                  visible={modalVisible}
-                  onRequestClose={() => {alert("Modal has been closed.")}}
-                 >
+                  visible={this.state.location !== null}
+                >
                  <Container>
                      <Content>
                         {this.getLocationViewContent()}

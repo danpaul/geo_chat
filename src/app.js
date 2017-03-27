@@ -41,6 +41,7 @@ class App extends Component {
           latitude: null,
           longitude: null
       };
+      this.listeners = {};
       this.addLocation = this.addLocation.bind(this);
       this.closeDrawer = this.closeDrawer.bind(this);
       this.openDrawer = this.openDrawer.bind(this);
@@ -68,17 +69,29 @@ class App extends Component {
             });
             this.geoQuery.on('key_entered', (key) => {
                 // get the location data
-                firebase.database().ref(`/locations/${key}`).once('value', (snapshot) => {
+                let listener = (snapshot) => {
                     const locationData = snapshot.val();
                     if (!locationData) return;
                     locationData.key = snapshot.key;
-                    const locations = this.state.locations.concat([locationData]);
+                    let foundMatch = false;
+                    const locations = this.state.locations.map((l) => {
+                        if (l.key !== locationData.key) { return l; }
+                        foundMatch = true;
+                        return locationData;
+                    });
+                    if (!foundMatch) { locations.push(locationData); }
                     this.setState({ locations });
-                });
+                };
+                listener = listener.bind(this);
+                this.listeners[key] = listener;
+                // this.state.listeners.key = this.listeners.key.bind(this);
+                firebase.database().ref(`/locations/${key}`).on('value', this.listeners[key]);
             });
             this.geoQuery.on('key_exited', (key) => {
                 const locations = this.state.locations.filter(l => l.key !== key);
                 this.setState({ locations });
+                firebase.database().ref(`/locations/${key}`).off('value', this.listeners[key]);
+                delete this.listeners[key];
             });
         }
       });
