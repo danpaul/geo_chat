@@ -2,7 +2,8 @@
 
 import _ from 'underscore';
 import React, { Component } from 'react';
-import { Dimensions, Text, Modal, ScrollView } from 'react-native';
+import { Dimensions, Text, ScrollView } from 'react-native';
+import Modal from 'react-native-root-modal';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { Container,
          Card,
@@ -23,6 +24,7 @@ class Map extends Component {
         this.state = { location: null };
         this.getLocationViewContent = this.getLocationViewContent.bind(this);
         this.addNote = this.addNote.bind(this);
+        this.handleBackPress = this.handleBackPress.bind(this);
     }
     getLocations() {
         const self = this;
@@ -90,6 +92,9 @@ class Map extends Component {
             })
             .catch(err => console.log(err));
     }
+    handleBackPress() {
+        this.setState({ location: null });
+    }
     handleLocationSelect(location) {
         this.setState({ location });
     }
@@ -106,6 +111,13 @@ class Map extends Component {
                   animationType={'slide'}
                   transparent={false}
                   visible={this.state.location !== null}
+                  style={{
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      left: 0,
+                      backgroundColor: '#FFFFFF'
+                  }}
                 >
                  <Container>
                      <Content>
@@ -113,7 +125,7 @@ class Map extends Component {
                      </Content>
                      <Footer>
                          <FooterTab>
-                             <Button full>
+                             <Button full onPress={this.handleBackPress}>
                                  <Text>Back</Text>
                              </Button>
                          </FooterTab>
