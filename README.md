@@ -9,6 +9,7 @@ This is a test/learning project using React Native and Firebase. The app allows 
 * Sort notes by recency (most recent at top)
 * Android
   * Update map config: https://github.com/airbnb/react-native-maps/blob/master/docs/installation.md
+  * Move buttons hidden by control buttons
 * Profile
   * Set username on register
   * Allow profile image

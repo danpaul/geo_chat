@@ -159,6 +159,9 @@ class App extends Component {
       this.setState({ activeTab });
   }
   render() {
+// asdf
+return this.getContent();
+
       return (
           <Drawer
             ref={(ref) => { this.drawer = ref; }}

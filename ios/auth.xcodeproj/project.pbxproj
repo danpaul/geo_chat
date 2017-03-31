@@ -70,6 +70,7 @@
 		334B8B30746845EFADEC3BD2 /* Skia.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B63B3ECCB58E4B3BB986A43D /* Skia.ttf */; };
 		5B787A95CE30472D950AB02E /* Times New Roman.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9287C5C7EB1F4FFF84BCEEF8 /* Times New Roman.ttf */; };
 		91BAF3554189417D92C03DC8 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C3A73FB6B78249428186947F /* Zocial.ttf */; };
+		3B008FC85B3547079BB61156 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 363D85998B414AA284664942 /* OFL.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -332,6 +333,7 @@
 		B63B3ECCB58E4B3BB986A43D /* Skia.ttf */ = {isa = PBXFileReference; name = "Skia.ttf"; path = "../node_modules/native-base/Fonts/Skia.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		9287C5C7EB1F4FFF84BCEEF8 /* Times New Roman.ttf */ = {isa = PBXFileReference; name = "Times New Roman.ttf"; path = "../node_modules/native-base/Fonts/Times New Roman.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		C3A73FB6B78249428186947F /* Zocial.ttf */ = {isa = PBXFileReference; name = "Zocial.ttf"; path = "../node_modules/native-base/Fonts/Zocial.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		363D85998B414AA284664942 /* OFL.txt */ = {isa = PBXFileReference; name = "OFL.txt"; path = "../node_modules/native-base/Fonts/OFL.txt"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -608,6 +610,7 @@
 				B63B3ECCB58E4B3BB986A43D /* Skia.ttf */,
 				9287C5C7EB1F4FFF84BCEEF8 /* Times New Roman.ttf */,
 				C3A73FB6B78249428186947F /* Zocial.ttf */,
+				363D85998B414AA284664942 /* OFL.txt */,
 			);
 			name = Resources;
 			path = "";
@@ -1016,6 +1019,7 @@
 				334B8B30746845EFADEC3BD2 /* Skia.ttf in Resources */,
 				5B787A95CE30472D950AB02E /* Times New Roman.ttf in Resources */,
 				91BAF3554189417D92C03DC8 /* Zocial.ttf in Resources */,
+				3B008FC85B3547079BB61156 /* OFL.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
