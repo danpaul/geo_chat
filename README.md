@@ -6,10 +6,11 @@ This is a test/learning project using React Native and Firebase. The app allows 
 * debug: `adb reverse tcp:8081 tcp:8081`
 
 ## Todo
-* Sort notes by recency (most recent at top)
+* X Sort notes by recency (most recent at top)
+* Router - add router
 * Android
-  * Update map config: https://github.com/airbnb/react-native-maps/blob/master/docs/installation.md
-  * Move buttons hidden by control buttons
+  * X Update map config: https://github.com/airbnb/react-native-maps/blob/master/docs/installation.md
+  * X Move buttons hidden by control buttons
 * Profile
   * Set username on register
   * Allow profile image

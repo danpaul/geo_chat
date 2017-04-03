@@ -17,7 +17,8 @@ class Sidebar extends Component {
             height: Dimensions.get('window').height,
             backgroundColor: '#FFFFFF',
             flexDirection: 'column',
-            justifyContent: 'flex-end'
+            justifyContent: 'flex-start',
+            paddingTop: 20
         };
         return (
             <View style={style}>

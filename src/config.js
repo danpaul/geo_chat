@@ -6,5 +6,7 @@ export default {
         storageBucket: 'map-chat-d64e4.appspot.com',
         messagingSenderId: '8104691461'
     },
-    geoRadius: 2
+    // geoRadius: 2
+    // asdf
+    geoRadius: 2000
 };

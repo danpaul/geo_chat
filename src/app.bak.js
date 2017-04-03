@@ -3,7 +3,7 @@
 
 // import _ from 'underscore';
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import firebase from 'firebase';
 import { Container,
          Drawer,
@@ -161,13 +161,31 @@ class App extends Component {
       this.setState({ activeTab });
   }
   render() {
-      return (<Router>
-          <Scene key="modal" component={Modal} >
-              <Scene key="root">
-                  <Scene key="login" component={LoginForm} title="Login" initial/>
-              </Scene>
-          </Scene>
-      </Router>);
+      return (
+          <Drawer
+            ref={(ref) => { this.drawer = ref; }}
+            content={<SideBar logout={this.logout} closeDrawer={this.closeDrawer} />}
+            onClose={() => this.closeDrawer()}
+          >
+            <Container>
+                <Header>
+                    <Left>
+                        <Button transparent onPress={this.openDrawer} >
+                            <Icon name='menu' />
+                        </Button>
+                    </Left>
+                    <Body>
+                        <Title>Map Chat</Title>
+                    </Body>
+                    <Right />
+                </Header>
+                <Content>
+                    {this.getContent()}
+                </Content>
+                {this.getFooter()}
+            </Container>
+        </Drawer>
+    );
   }
 }
 

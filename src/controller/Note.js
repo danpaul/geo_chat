@@ -5,8 +5,9 @@ class Note {
         return new Promise((resolve, reject) => {
             const path = `/locations/${locationId}/notes`;
             const user = firebase.auth().currentUser.uid;
+            const timestamp = firebase.database.ServerValue.TIMESTAMP;
             const newPostRef = firebase.database().ref(path).push();
-            newPostRef.set({ message, user }).then(resolve).catch(reject);
+            newPostRef.set({ message, user, timestamp }).then(resolve).catch(reject);
         });
     }
 }
