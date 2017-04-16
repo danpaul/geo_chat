@@ -1,39 +1,24 @@
 /*eslint no-underscore-dangle: ["error", { "allow": ["_root"] }]*/
-/* global navigator */
-
-// import _ from 'underscore';
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import firebase from 'firebase';
-import { Container,
-         Drawer,
-         Header,
-         Title,
-         Content,
-         Footer,
+import { Footer,
          FooterTab,
          Button,
-         Left,
-         Right,
-         Body,
          Icon } from 'native-base';
-import GeoFire from 'geofire';
-import { Scene, Router, TabBar, Modal, Schema, Actions, Reducer, ActionConst } from 'react-native-router-flux'
-
+import { Scene, Router, Modal, Actions, ActionConst } from 'react-native-router-flux';
 
 import { Spinner } from './components/common';
 import LoginForm from './components/LoginForm';
-import SideBar from './components/SideBar';
 import Map from './components/Map';
 import AddLocationNote from './components/AddLocationNote';
+import Loading from './components/Loading';
+import TabIcon from './components/TabIcon';
+
 import config from './config';
 import { location } from './controller';
 
-const MARKER_SUBSCRIBE_RADIUS = 20; // distance in KM
-
 class App extends Component {
-
-
   constructor() {
       super();
       this.state = {
@@ -45,61 +30,13 @@ class App extends Component {
       };
       this.listeners = {};
       this.addLocation = this.addLocation.bind(this);
-      this.closeDrawer = this.closeDrawer.bind(this);
-      this.openDrawer = this.openDrawer.bind(this);
-  }
-  componentWillMount() {
-      firebase.initializeApp(config.firebase);
-      firebase.auth().onAuthStateChanged((user) => {
-          if (user) {
-              this.setState({ loggedIn: true });
-          } else {
-              this.setState({ loggedIn: false });
-          }
-      });
-      this.geoFire = new GeoFire(firebase.database().ref('/locations-geofire'));
   }
   componentDidMount() {
-      let initialized = false;
-      this.watchID = navigator.geolocation.watchPosition(({ coords:
-                                                          { latitude, longitude } }) => {
-        if (!initialized) {
-            initialized = true;
-            this.geoQuery = this.geoFire.query({
-              center: [latitude, longitude],
-              radius: MARKER_SUBSCRIBE_RADIUS
-            });
-            this.geoQuery.on('key_entered', (key) => {
-                // get the location data
-                let listener = (snapshot) => {
-                    const locationData = snapshot.val();
-                    if (!locationData) return;
-                    locationData.key = snapshot.key;
-                    let foundMatch = false;
-                    const locations = this.state.locations.map((l) => {
-                        if (l.key !== locationData.key) { return l; }
-                        foundMatch = true;
-                        return locationData;
-                    });
-                    if (!foundMatch) { locations.push(locationData); }
-                    this.setState({ locations });
-                };
-                listener = listener.bind(this);
-                this.listeners[key] = listener;
-                // this.state.listeners.key = this.listeners.key.bind(this);
-                firebase.database().ref(`/locations/${key}`).on('value', this.listeners[key]);
-            });
-            this.geoQuery.on('key_exited', (key) => {
-                const locations = this.state.locations.filter(l => l.key !== key);
-                this.setState({ locations });
-                firebase.database().ref(`/locations/${key}`).off('value', this.listeners[key]);
-                delete this.listeners[key];
-            });
-        }
+      firebase.initializeApp(config.firebase);
+      firebase.auth().onAuthStateChanged((user) => {
+          if (!user) Actions.login({ type: ActionConst.RESET });
+          else Actions.mapTab({ type: ActionConst.RESET });
       });
-  }
-  componentWillUnmount() {
-      navigator.geolocation.clearWatch(this.watchID);
   }
   getContent() {
       switch (this.state.loggedIn) {
@@ -148,27 +85,66 @@ class App extends Component {
             console.warn('App.addLocation: ', err);
         });
   }
-  logout() {
-    firebase.auth().signOut();
-  }
-  openDrawer() {
-    this.drawer._root.open();
-  }
-  closeDrawer() {
-    this.drawer._root.close();
-  }
-  selectTab(activeTab) {
-      this.setState({ activeTab });
-  }
   render() {
       return (<Router>
           <Scene key="modal" component={Modal} >
               <Scene key="root">
-                  <Scene key="login" component={LoginForm} title="Login" initial/>
+                  <Scene
+                    key="loading"
+                    component={Loading}
+                    title="Loading"
+                    initial
+                  />
+                  <Scene
+                    key="login"
+                    component={LoginForm}
+                    title="Sign In"
+                    formType="login"
+                  />
+                  <Scene
+                    key="register"
+                    component={LoginForm}
+                    title="Sign In"
+                    formType="register"
+                  />
+                  <Scene
+                    key="addNote"
+                    component={AddLocationNote}
+                    title="Add Note"
+                    isNote
+                  />
+                  <Scene
+                    key="mapTab"
+                    tabs
+                    tabBarStyle={style.tabBarStyle}
+                  >
+                      <Scene
+                        key="map"
+                        component={Map}
+                        title="Map"
+                        icon={TabIcon}
+                      />
+                      <Scene
+                        key="addLocation"
+                        component={AddLocationNote}
+                        title="Add Location"
+                        isNote={false}
+                        icon={TabIcon}
+                      />
+                </Scene>
               </Scene>
           </Scene>
       </Router>);
   }
 }
+
+const style = {
+    tabBarStyle: {
+        // borderTopWidth: 0.5,
+        borderColor: '#b7b7b7',
+        backgroundColor: 'white',
+        opacity: 1
+    }
+};
 
 export default App;

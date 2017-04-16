@@ -13,22 +13,82 @@ import { Container,
          FooterTab,
          Button,
          Body } from 'native-base';
+import GeoFire from 'geofire';
+import firebase from 'firebase';
+import { Actions } from 'react-native-router-flux';
 
 import AddLocationNote from './AddLocationNote';
 
 import { note } from '../controller';
 
+const MARKER_SUBSCRIBE_RADIUS = 20;
+
 class Map extends Component {
     constructor() {
         super();
-        this.state = { location: null };
+
+        this.state = { location: null, locations: [] };
+
+        this.watchID = null;
+        this.geoQuery = null;
+        this.geoFire = null;
+        this.listeners = [];
+        this.locations = [];
+
         this.getLocationViewContent = this.getLocationViewContent.bind(this);
         this.addNote = this.addNote.bind(this);
         this.handleBackPress = this.handleBackPress.bind(this);
     }
+    componentDidMount() {
+      this.geoFire = new GeoFire(firebase.database().ref('/locations-geofire'));
+      this.watchID = navigator.geolocation.watchPosition(({ coords:
+                                                          { latitude, longitude } }) => {
+        if (this.geoQuery) {
+            return this.geoQuery.updateCriteria({
+                center: [latitude, longitude],
+            });
+        }
+        this.geoQuery = this.geoFire.query({
+            center: [latitude, longitude],
+            radius: MARKER_SUBSCRIBE_RADIUS
+        });
+        this.geoQuery.on('key_entered', (key) => {
+            // get the location data and create a listener for changes
+            let listener = (snapshot) => {
+                const locationData = snapshot.val();
+                if (!locationData) return;
+                locationData.key = snapshot.key;
+                let foundMatch = false;
+                const locations = this.state.locations.map((l) => {
+                    if (l.key !== locationData.key) { return l; }
+                    foundMatch = true;
+                    return locationData;
+                });
+                if (!foundMatch) { locations.push(locationData); }
+                this.setState({ locations });
+            };
+            listener = listener.bind(this);
+            this.listeners[key] = listener;
+            firebase.database().ref(`/locations/${key}`).on('value', this.listeners[key]);
+        });
+        this.geoQuery.on('key_exited', (key) => {
+            const locations = this.state.locations.filter(l => l.key !== key);
+            this.setState({ locations });
+            firebase.database().ref(`/locations/${key}`).off('value', this.listeners[key]);
+            delete this.listeners[key];
+        });
+      });
+    }
+    componentWillUnmount() {
+        navigator.geolocation.clearWatch(this.watchID);
+        _.each(this.listeners, (listener, key) => {
+            firebase.database().ref(`/locations/${key}`).off('value', this.listeners[key]);
+        });
+        this.geoQuery.cancel();
+    }
     getLocations() {
         const self = this;
-        return this.props.locations.map(l =>
+        return this.state.locations.map(l =>
             <Marker
                 key={l.key}
                 coordinate={{
@@ -46,8 +106,8 @@ class Map extends Component {
     getLocationViewContent() {
         if (!this.state.location) return null;
         let location = this.state.location;
-        // grab the "live" location from props if one exists
-        this.props.locations.forEach((l) => {
+        // grab the "live" location from state if one exists
+        this.state.locations.forEach((l) => {
             if (l.key === this.state.location.key) location = l;
         });
         let notes = _.map(location.notes, (nIn, k) => {
@@ -88,7 +148,7 @@ class Map extends Component {
         this.setState({ location: null });
     }
     handleLocationSelect(location) {
-        this.setState({ location });
+        Actions.addNote({ location });
     }
     render() {
         return (

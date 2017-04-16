@@ -1,36 +1,47 @@
 import firebase from 'firebase';
 import React, { Component } from 'react';
 import { Text, Dimensions, View } from 'react-native';
+import { Actions, ActionConst } from 'react-native-router-flux';
 
-import { Button, Card, CardSection, Input, Spinner } from './common';
+import { Button, CardSection, Input, Spinner } from './common';
 
+const defaultError = 'Authentication failed';
 const getDefaultState = function () {
     return { email: '', password: '', error: '', loading: false };
 };
 
 class LoginForm extends Component {
-    state = getDefaultState();
+    constructor() {
+        super();
+        this.state = getDefaultState();
+        this.handleFormSwitch = this.handleFormSwitch.bind(this);
+    }
+    componentWillUpdate(nextProps) {
+        if (nextProps.formType !== this.props.formType) {
+            this.setState(getDefaultState());
+        }
+    }
     onButtonPress() {
-        const { email, password } = this.state;
         this.setState({ error: '', loading: true });
-        firebase.auth().signInWithEmailAndPassword(email, password)
-            .then(() => {
-                this.onLoginSuccess();
-            })
-            .catch(() => {
-                firebase.auth().createUserWithEmailAndPassword(email, password)
-                    .then(() => {
-                        this.onLoginSuccess();
-                    })
-                    .catch((err) => {
-                        console.warn(err);
-                        this.setState({ loading: false,
-                                        error: 'Authentication failed' });
-                    });
+        const { email, password } = this.state;
+        const method = this.props.formType === 'login' ?
+            firebase.auth().signInWithEmailAndPassword(email, password) :
+            firebase.auth().createUserWithEmailAndPassword(email, password);
+        method
+            .then(this.onLoginSuccess)
+            .catch((err) => {
+                const error = err.message ? err.message : defaultError;
+                this.setState({ loading: false, error });
             });
     }
     onLoginSuccess() {
-        this.setState(getDefaultState());
+        Actions.map({ type: ActionConst.RESET });
+    }
+    handleFormSwitch() {
+        const action = this.props.formType === 'login' ? Actions.register : Actions.login;
+        const formType = this.props.formType === 'login' ? 'regiser' : 'login';
+        action();
+        Actions.refresh({ formType });
     }
     renderButton() {
         if (this.state.loading) {
@@ -38,14 +49,14 @@ class LoginForm extends Component {
         }
         return (
             <Button onPress={this.onButtonPress.bind(this)}>
-                Log In / Regsiter
+                {this.props.formType === 'login' ? 'Log In' : 'Register'}
             </Button>
         );
     }
     render() {
         return (
-            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', height: Dimensions.get('window').height}}>
-                <View style={{alignSelf: 'center', height: 300, width: Dimensions.get('window').width}}>
+            <View style={styles.formWrap}>
+                <View style={styles.cardWrap}>
                     <CardSection>
                         <Input
                             label="Email"
@@ -71,6 +82,9 @@ class LoginForm extends Component {
                     <CardSection>
                         {this.renderButton()}
                     </CardSection>
+                    <Text style={styles.linkStyle} onPress={this.handleFormSwitch}>
+                        {this.props.formType === 'login' ? 'Register' : 'Log In'}
+                    </Text>
                 </View>
             </View>
         );
@@ -78,6 +92,22 @@ class LoginForm extends Component {
 }
 
 const styles = {
+    formWrap: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        height: Dimensions.get('window').height
+    },
+    cardWrap: {
+        padding: 5,
+        width: Dimensions.get('window').width
+    },
+    linkStyle: {
+        padding: 10,
+        textAlign: 'center',
+        textDecorationLine: 'underline'
+    },
     errorTextStyles: {
         fontSize: 20,
         alignSelf: 'center',
